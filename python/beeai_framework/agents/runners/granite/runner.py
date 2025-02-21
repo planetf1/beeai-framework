@@ -34,6 +34,9 @@ from beeai_framework.utils.strings import create_strenum
 
 
 class GraniteRunner(DefaultRunner):
+    # TODO:333 - Currently a global variable is used to determine if the tool calling should be used or not
+    use_native_tool_calling: bool = True
+
     def __init__(self, input: BeeInput, options: BeeRunOptions, run: RunContext) -> None:
         super().__init__(input, options, run)
 

@@ -83,16 +83,31 @@ You do not need a tool to get the current Date and Time. Use the information ava
     )
 )
 
+# TODO: 333 Additional prompts in ts
+# export const GraniteBeeSchemaErrorPrompt = BeeSchemaErrorPrompt.fork((config) => {
+#   config.template = `Error: The generated response does not adhere to the communication structure mentioned in the system prompt.
+# You communicate only in instruction lines. Valid instruction lines are 'Thought' followed by 'Tool Name' and then 'Tool Input' or 'Thought' followed by 'Final Answer'.`;
+# });
+
+# export const GraniteBeeUserPrompt = BeeUserPrompt.fork((config) => {
+#   config.template = `{{input}}`;
+# });
+# TODO: 333 Updated text string to match typescript (minor)
 GraniteToolNotFoundErrorTemplate = PromptTemplate(
-    PromptTemplateInput(
-        schema=ToolNotFoundErrorTemplateInput,
-        template="""The tool does not exist!
+    schema=ToolNotFoundErrorTemplateInput,
+    template="""The tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}""",
     )
 )
 
+# TODO: 333 Additional prompt in ts
+# export const GraniteBeeToolErrorPrompt = BeeToolErrorPrompt.fork((config) => {
+#   config.template = `The tool has failed; the error log is shown below. If the tool cannot accomplish what you want, use a different tool or explain why you can't use it.
+
+# {{reason}}`;
+# });
 GraniteToolInputErrorTemplate = PromptTemplate(
     PromptTemplateInput(
         schema=ToolInputErrorTemplateInput,
