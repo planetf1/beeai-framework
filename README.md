@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
 _Source: [python/examples/workflows/multi_agents.py](/python/examples/workflows/multi_agents.py)_
 
-TypeScript version of this example can be found [here](/typescript/README.md).
+TypeScript version of this example can be found [here](/typescript/examples/workflows/multiAgents.ts).
 
 ### Running the example
 
