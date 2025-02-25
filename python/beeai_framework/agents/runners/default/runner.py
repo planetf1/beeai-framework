@@ -51,7 +51,12 @@ from beeai_framework.parsers.line_prefix import (
     LinePrefixParserNode,
     LinePrefixParserUpdate,
 )
-from beeai_framework.retryable import Retryable, RetryableConfig, RetryableContext, RetryableInput
+from beeai_framework.retryable import (
+    Retryable,
+    RetryableConfig,
+    RetryableContext,
+    RetryableInput,
+)
 from beeai_framework.tools import ToolError, ToolInputValidationError
 from beeai_framework.tools.tool import StringToolOutput, Tool, ToolOutput
 from beeai_framework.utils.strings import create_strenum
@@ -93,10 +98,16 @@ class DefaultRunner(BaseRunner):
                     next=["tool_output"],
                 ),
                 "tool_output": LinePrefixParserNode(
-                    prefix="Function Input: ", field=ParserField.from_type(str), is_end=True, next=["final_answer"]
+                    prefix="Function Input: ",
+                    field=ParserField.from_type(str),
+                    is_end=True,
+                    next=["final_answer"],
                 ),
                 "final_answer": LinePrefixParserNode(
-                    prefix="Final Answer: ", field=ParserField.from_type(str), is_end=True, is_start=True
+                    prefix="Final Answer: ",
+                    field=ParserField.from_type(str),
+                    is_end=True,
+                    is_start=True,
                 ),
             }
         )
@@ -117,7 +128,10 @@ class DefaultRunner(BaseRunner):
                     await self.memory.add(UserMessage(schema_error_prompt, {"tempMessage": True}))
 
         async def executor(_: RetryableContext) -> Awaitable[BeeAgentRunIteration]:
-            await input.emitter.emit("start", {"meta": input.meta, "tools": self._input.tools, "memory": self.memory})
+            await input.emitter.emit(
+                "start",
+                {"meta": input.meta, "tools": self._input.tools, "memory": self.memory},
+            )
 
             parser = self.create_parser()
 
@@ -129,36 +143,27 @@ class DefaultRunner(BaseRunner):
                     "update",
                     {
                         "data": parser.final_state,
-                        "update": {"key": data.key, "value": data.field.raw, "parsedValue": data.value.model_dump()},
+                        "update": {
+                            "key": data.key,
+                            "value": data.field.raw,
+                            "parsedValue": data.value.model_dump(),
+                        },
                         "meta": {**input.meta.model_dump(), "success": True},
                         "tools": self._input.tools,
                         "memory": self.memory,
                     },
                 )
 
-                    if result.prefix.terminal:
-                        abort()
-
-        def observe(llm_emitter: Emitter) -> None:
-            llm_emitter.on("newToken", new_token)
-
-        # TODO: 333 check this exists, shallow copy
-        tools: list[Tool] = self._input.tools[:]
-        output: ChatModelOutput = await self._input.llm.create(
-            # For native tool calling we pass the tools to the llm call.
-            ChatModelInput(messages=self.memory.messages[:], stream=True, tools=tools if self.use_native_tool_calling else None)
-        ).observe(fn=observe)
-
-        # Pick up any remaining lines in parser buffer
-        for result in parser.finalize():
-            if result is not None:
-                state[result.prefix.name] = result.content
-
+            async def on_partial_update(data: LinePrefixParserUpdate, event: EventMeta) -> None:
                 await input.emitter.emit(
                     "partialUpdate",
                     {
                         "data": parser.final_state,
-                        "update": {"key": data.key, "value": data.delta, "parsedValue": data.value.model_dump()},
+                        "update": {
+                            "key": data.key,
+                            "value": data.delta,
+                            "parsedValue": data.value.model_dump(),
+                        },
                         "meta": {**input.meta.model_dump(), "success": True},
                         "tools": self._input.tools,
                         "memory": self.memory,
@@ -181,8 +186,16 @@ class DefaultRunner(BaseRunner):
                 if parser.partial_state.get("tool_output") is not None:
                     abort()
 
+            # TODO: 333 check this exists, shallow copy
+            tools: list[Tool] = self._input.tools[:]
+            # For native tool calling we pass the tools to the llm call.
+
             output: ChatModelOutput = await self._input.llm.create(
-                ChatModelInput(messages=self.memory.messages[:], stream=True)
+                ChatModelInput(
+                    messages=self.memory.messages[:],
+                    stream=True,
+                    tools=tools if self.use_native_tool_calling else None,
+                )
             ).observe(lambda llm_emitter: llm_emitter.on("newToken", on_new_token))
 
             await parser.end()
@@ -190,7 +203,8 @@ class DefaultRunner(BaseRunner):
             await self.memory.delete_many([msg for msg in self.memory.messages if not msg.meta.get("success", True)])
 
             return BeeAgentRunIteration(
-                raw=output, state=BeeIterationResult.model_validate(parser.final_state, strict=False)
+                raw=output,
+                state=BeeIterationResult.model_validate(parser.final_state, strict=False),
             )
 
         if self._options and self._options.execution and self._options.execution.max_retries_per_step:
