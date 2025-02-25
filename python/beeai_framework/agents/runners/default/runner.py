@@ -194,6 +194,7 @@ class DefaultRunner(BaseRunner):
                 ChatModelInput(
                     messages=self.memory.messages[:],
                     stream=True,
+                    # TODO: 333 BREAKS bee/granite samples ! (The generated output does not adhere to the schema.)
                     tools=tools if self.use_native_tool_calling else None,
                 )
             ).observe(lambda llm_emitter: llm_emitter.on("newToken", on_new_token))
