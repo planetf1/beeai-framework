@@ -10,10 +10,11 @@ from langchain_community.utilities import WikipediaAPIWrapper
 from pydantic import BaseModel, Field
 
 from beeai_framework.agents.bee.agent import BeeAgent
-from beeai_framework.agents.types import BeeInput, BeeRunInput
+from beeai_framework.agents.types import BeeAgentExecutionConfig, BeeInput, BeeRunInput, BeeRunOptions
 from beeai_framework.backend.chat import ChatModel
 from beeai_framework.emitter.emitter import Emitter, EventMeta
 from beeai_framework.emitter.types import EmitterOptions
+from beeai_framework.errors import FrameworkError
 from beeai_framework.memory.token_memory import TokenMemory
 from beeai_framework.tools.tool import StringToolOutput, Tool
 from beeai_framework.utils.custom_logger import BeeLogger
@@ -83,23 +84,23 @@ def create_agent() -> BeeAgent:
     return agent
 
 
-def process_agent_events(event_data: dict[str, Any], event_meta: EventMeta) -> None:
+def process_agent_events(data: dict[str, Any], event: EventMeta) -> None:
     """Process agent events and log appropriately"""
 
-    if event_meta.name == "error":
-        reader.write("Agent 🤖 : ", event_data["error"])
-    elif event_meta.name == "retry":
+    if event.name == "error":
+        reader.write("ERROR :", data["error"].explain())
+    elif event.name == "retry":
         reader.write("Agent 🤖 : ", "retrying the action...")
-    elif event_meta.name == "update":
-        reader.write(f"Agent({event_data['update']['key']}) 🤖 : ", event_data["update"]["parsedValue"])
-    # elif event_meta.name == "start":
+    elif event.name == "update":
+        reader.write(f"Agent({data['update']['key']}) 🤖 : ", data["update"]["parsedValue"])
+    # elif event.name == "start":
     #     reader.write("Agent 🤖 : ", "starting new iteration")
-    # elif event_meta.name == "success":
+    # elif event.name == "success":
     #     reader.write("Agent 🤖 : ", "success")
 
 
 def observer(emitter: Emitter) -> None:
-    emitter.on("*.*", process_agent_events, EmitterOptions(match_nested=True))
+    emitter.on("*", process_agent_events, EmitterOptions(match_nested=False))
 
 
 async def main() -> None:
@@ -124,19 +125,15 @@ async def main() -> None:
             # Run agent with the prompt
             response = await agent.run(
                 BeeRunInput(prompt=prompt),
-                {
-                    "execution": {
-                        "max_retries_per_step": 3,
-                        "total_max_retries": 10,
-                        "max_iterations": 20,
-                    }
-                },
+                BeeRunOptions(
+                    execution=BeeAgentExecutionConfig(max_retries_per_step=3, total_max_retries=0, max_iterations=20)
+                ),
             ).observe(observer)
 
             reader.write("Agent 🤖 : ", response.result.text)
-
-    except Exception as e:
-        logger.error(f"Application error: {e!s}")
+    except FrameworkError as e:
+        print(e.explain())
+        # logger.error(f"Application error: {e!s}")
 
 
 if __name__ == "__main__":

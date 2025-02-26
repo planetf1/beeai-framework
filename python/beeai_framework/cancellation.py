@@ -16,7 +16,7 @@
 import contextlib
 import threading
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import TypeVar
 
 from pydantic import BaseModel
 
@@ -24,6 +24,8 @@ from beeai_framework.errors import AbortError
 from beeai_framework.utils.custom_logger import BeeLogger
 
 logger = BeeLogger(__name__)
+
+T = TypeVar("T")
 
 
 class AbortSignal(BaseModel):
@@ -82,7 +84,8 @@ class AbortController:
         return self._signal
 
     def abort(self, reason: str | None = None) -> None:
-        self._signal._abort(reason)
+        pass
+        # self._signal._abort(reason)
 
 
 def register_signals(controller: AbortController, signals: list[AbortSignal]) -> None:
@@ -96,13 +99,11 @@ def register_signals(controller: AbortController, signals: list[AbortSignal]) ->
 
 
 async def abort_signal_handler(
-    fn: Callable[[], Awaitable[Any]], signal: AbortSignal | None = None, on_abort: Callable[[], None] | None = None
-) -> Awaitable[Any]:
+    fn: Callable[[], Awaitable[T]], signal: AbortSignal | None = None, on_abort: Callable[[], None] | None = None
+) -> T:
     def abort_handler() -> None:
         if on_abort:
             on_abort()
-        if signal:
-            signal.cancel()
 
     if signal:
         if signal.aborted:

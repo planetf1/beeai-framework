@@ -16,6 +16,18 @@ from asyncio import CancelledError
 from collections.abc import Generator
 
 
+def _format_error_message(e: BaseException, *, offset: int = 0, strip_traceback: bool = True) -> str:
+    cls = type(e).__name__
+    module = type(e).__module__
+
+    prefix = "  " * offset
+    formatted = f"{cls}({module}): {e!s}"
+    if strip_traceback:
+        formatted = formatted.split("\nTraceback")[0]
+
+    return "\n".join([f"{prefix}{line}" for line in formatted.split("\n")])
+
+
 class FrameworkError(Exception):
     """
     Base class for Framework errors which extends Exception
@@ -26,25 +38,22 @@ class FrameworkError(Exception):
         self,
         message: str = "Framework error",
         *,
-        is_fatal: bool = False,
-        is_retryable: bool = True,
-        cause: Exception | None = None,
+        is_fatal: bool = True,
+        is_retryable: bool = False,
+        cause: Exception | None = None,  # remove
+        predecessor: Exception | None = None,
     ) -> None:
         super().__init__(message)
 
         # TODO: What other attributes should all our framework errors have?
         self.message = message
-        self.is_fatal = is_fatal
-        self.is_retryable = is_retryable
-        self.__cause__ = cause
+        self._is_fatal = is_fatal
+        self._is_retryable = is_retryable
+        self._predecessor = predecessor or cause
 
-    @staticmethod
-    def __get_message(error: Exception) -> str:
-        """
-        Get message from exception, but use classname if none (for dump/explain)
-        """
-        message = str(error) if len(str(error)) > 0 else type(error).__name__
-        return message
+    @property
+    def predecessor(self) -> BaseException | None:
+        return self._predecessor or self.__cause__
 
     @staticmethod
     def is_retryable(error: Exception) -> bool:
@@ -76,12 +85,11 @@ class FrameworkError(Exception):
 
         return False
 
-    def traverse_errors(self) -> Generator[BaseException, None, None]:
-        cause: BaseException | None = self.__cause__
-
-        while cause is not None:
-            yield cause
-            cause = cause.__cause__
+    def traverse(self) -> Generator["FrameworkError", None, None]:
+        next: FrameworkError | BaseException | None = self
+        while isinstance(next, FrameworkError):
+            yield next
+            next = next.predecessor
 
     def get_cause(self) -> BaseException:
         deepest_cause: BaseException = self
@@ -93,16 +101,39 @@ class FrameworkError(Exception):
 
     def explain(self) -> str:
         output = []
-        errors = [self, *self.traverse_errors()]
-        for index, error in enumerate(errors):
-            offset = "  " * (2 * index)
-            message = str(error) if len(str(error)) > 0 else type(error).__name__
-            output.append(f"{offset}{message}")
+
+        for offset, error in enumerate(self.traverse()):
+            message = _format_error_message(error, offset=offset)
+            output.append(message)
+
+        if error and error.predecessor:
+            message = _format_error_message(error.predecessor, offset=offset + 1, strip_traceback=False)
+            output.append(message)
+
         return "\n".join(output)
 
-    @staticmethod
-    def ensure(error: Exception) -> "FrameworkError":
-        return error if isinstance(error, FrameworkError) else FrameworkError(message=str(error), cause=error)
+    @classmethod
+    def ensure(cls, error: Exception) -> "FrameworkError":
+        if isinstance(error, FrameworkError):
+            return error
+        return cls(message="Something went wrong!", cause=error)
+
+
+class UnimplementedError(FrameworkError):
+    """
+    Raised when a method or function has not been implemented.
+    """
+
+    def __init__(self, message: str = "Not implemented!", *, cause: Exception | None = None) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, predecessor=cause)
+
+
+class ArgumentError(FrameworkError):
+    """Raised for invalid or unsupported values."""
+
+    def __init__(self, message: str = "Provided value is not supported!", *, cause: Exception | None = None) -> None:
+        # TODO is a value error fatal. It is with same value...
+        super().__init__(message, is_fatal=True, is_retryable=False, predecessor=cause)
 
 
 class AbortError(FrameworkError, CancelledError):

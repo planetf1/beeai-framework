@@ -27,7 +27,7 @@ class ResourceError(FrameworkError):
         is_retryable: bool = False,
         cause: Exception | None = None,
     ) -> None:
-        super().__init__(message, is_fatal=is_fatal, is_retryable=is_retryable, cause=cause)
+        super().__init__(message, is_fatal=is_fatal, is_retryable=is_retryable, predecessor=cause)
 
 
 class ResourceFatalError(ResourceError):
@@ -41,4 +41,4 @@ class SerializerError(FrameworkError):
     """Raised for errors caused by serializer."""
 
     def __init__(self, message: str = "Serializer error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+        super().__init__(message, is_fatal=True, is_retryable=False, predecessor=cause)
