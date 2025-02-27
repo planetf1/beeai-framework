@@ -44,9 +44,13 @@ def message_validator(messages: list[Message]) -> list[Message]:
     return messages
 
 
-def tool_validator(tools: list[Tool]) -> list[Tool]:
-    if len(tools) and not isinstance(tools[0], Tool):
-        raise ValidationError("incoming data must be a Tool")
+# TODO: REVIEW - Must validate all tools in the list
+def tool_validator(tools: list) -> list:
+    if not isinstance(tools, list):
+        raise ValidationError("incoming data must be a list")
+    for tool in tools:
+        if not isinstance(tool, Tool):
+            raise ValidationError(f"incoming data must be a Tool, received {type(tool)}")
     return tools
 
 
