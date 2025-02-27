@@ -96,8 +96,9 @@ You do not need a tool to get the current Date and Time. Use the information ava
 # });
 # TODO: 333 Updated text string to match typescript (minor)
 GraniteToolNotFoundErrorTemplate = PromptTemplate(
-    schema=ToolNotFoundErrorTemplateInput,
-    template="""The tool does not exist!
+    PromptTemplateInput(
+        schema=ToolNotFoundErrorTemplateInput,
+        template="""The tool does not exist!
 {{#tools.length}}
 Use one of the following tools: {{#trim}}{{#tools}}{{name}},{{/tools}}{{/trim}}
 {{/tools.length}}""",
