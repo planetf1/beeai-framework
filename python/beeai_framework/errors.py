@@ -51,8 +51,7 @@ class FrameworkError(Exception):
         """is error retryable?."""
         if isinstance(error, FrameworkError):
             return error.is_retryable
-        # TODO: Is a CancelledError (asyncio) retryable? Any other error classes
-        return isinstance(error, CancelledError)
+        return not isinstance(error, CancelledError)
 
     @staticmethod
     def is_fatal(error: Exception) -> bool:
