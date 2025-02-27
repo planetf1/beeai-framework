@@ -132,9 +132,7 @@ To run projects, use:
 python [project_name].py
 ```
 
-➡️ Explore more in our: 
-  - [Python examples library](/python/examples) 
-  - [TypeScript examples library](/typescript/examples)
+Explore more in our examples for [Python](/python/examples) and [TypeScript](/typescript/examples).
 
 ## Roadmap
 
