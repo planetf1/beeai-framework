@@ -25,7 +25,7 @@ class BackendError(FrameworkError):
         is_retryable: bool = False,
         cause: Exception | None = None,
     ) -> None:
-        super().__init__(message, is_fatal=is_fatal, is_retryable=is_retryable, predecessor=cause)
+        super().__init__(message, is_fatal=is_fatal, is_retryable=is_retryable, cause=cause)
 
 
 class ChatModelError(BackendError):
@@ -35,4 +35,4 @@ class ChatModelError(BackendError):
 
 class MessageError(FrameworkError):
     def __init__(self, message: str = "Message Error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, predecessor=cause)
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)

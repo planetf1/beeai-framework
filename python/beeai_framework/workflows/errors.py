@@ -18,4 +18,4 @@ from beeai_framework.errors import FrameworkError
 
 class WorkflowError(FrameworkError):
     def __init__(self, message: str = "Workflow error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, predecessor=cause)
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)

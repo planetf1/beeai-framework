@@ -16,9 +16,9 @@
 import json
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator, Awaitable, Callable
-from typing import Any, Literal, Self, TypeVar
+from typing import Annotated, Any, Literal, Self, TypeVar
 
-from pydantic import BaseModel, ConfigDict, Field, InstanceOf
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field, InstanceOf, ValidationError
 
 from beeai_framework.backend.constants import ProviderName
 from beeai_framework.backend.errors import ChatModelError
@@ -29,12 +29,25 @@ from beeai_framework.context import Run, RunContext, RunContextInput, RunInstanc
 from beeai_framework.emitter import Emitter, EmitterInput
 from beeai_framework.retryable import Retryable, RetryableConfig, RetryableContext
 from beeai_framework.template import PromptTemplate, PromptTemplateInput
+from beeai_framework.tools.tool import Tool
 from beeai_framework.utils.custom_logger import BeeLogger
 from beeai_framework.utils.models import ModelLike, to_model
 
 T = TypeVar("T", bound=BaseModel)
 ChatModelFinishReason: Literal["stop", "length", "function_call", "content_filter", "null"]
 logger = BeeLogger(__name__)
+
+
+def message_validator(messages: list[Message]) -> list[Message]:
+    if len(messages) and not isinstance(messages[0], Message):
+        raise ValidationError("incoming data must be a Message")
+    return messages
+
+
+def tool_validator(tools: list[Tool]) -> list[Tool]:
+    if len(tools) and not isinstance(tools[0], Tool):
+        raise ValidationError("incoming data must be a Tool")
+    return tools
 
 
 class ChatModelParameters(BaseModel):
@@ -57,7 +70,7 @@ class ChatConfig(BaseModel):
 
 class ChatModelStructureInput(BaseModel):
     input_schema: type[T] = Field(..., alias="schema")
-    messages: list[InstanceOf[Message]] = Field(..., min_length=1)
+    messages: Annotated[list, BeforeValidator(message_validator)]
     abort_signal: AbortSignal | None = None
     max_retries: int | None = None
 
@@ -67,16 +80,12 @@ class ChatModelStructureOutput(BaseModel):
 
 
 class ChatModelInput(ChatModelParameters):
-    tools: list[InstanceOf[Message]] = []
+    tools: Annotated[list, BeforeValidator(tool_validator)] | None = None
     abort_signal: AbortSignal | None = None
     stop_sequences: list[str] | None = None
-    response_format: dict[str, Any] | type[BaseModel] | None = None
+    response_format: dict[str, Any] | type[BaseModel] = None
     # tool_choice: NoneType # TODO
-    messages: list[InstanceOf[Message]] = Field(
-        ...,
-        min_length=1,
-        frozen=True,
-    )
+    messages: Annotated[list, BeforeValidator(message_validator)]
 
     model_config = ConfigDict(frozen=True)
 
@@ -226,7 +235,8 @@ IMPORTANT: You MUST answer with a JSON object that matches the JSON schema above
 
                 if input.stream:
                     abort_controller: AbortController = AbortController()
-                    async for value in self._create_stream(input, context):
+                    generator = self._create_stream(input, context)
+                    async for value in generator:
                         chunks.append(value)
                         await context.emitter.emit("newToken", (value, lambda: abort_controller.abort()))
                         if abort_controller.signal.aborted:
@@ -238,10 +248,12 @@ IMPORTANT: You MUST answer with a JSON object that matches the JSON schema above
 
                 await context.emitter.emit("success", {"value": result})
                 return result
-            except Exception as ex:
-                error = ChatModelError.ensure(ex)
-                await context.emitter.emit("error", {"error": error})
-                raise error from None
+            except ChatModelError as error:
+                await context.emitter.emit("error", error)
+                raise error
+            except Exception as error:
+                await context.emitter.emit("error", error)
+                raise ChatModelError("Model error has occurred.") from error
             finally:
                 await context.emitter.emit("finish", None)
 
