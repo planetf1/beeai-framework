@@ -65,12 +65,7 @@ async def xai_structure() -> None:
 
     llm = XAIChatModel("grok-2")
     user_message = UserMessage("How many islands make up the country of Cape Verde?")
-    response = await llm.create_structure(
-        {
-            "schema": TestSchema,
-            "messages": [user_message],
-        }
-    )
+    response = await llm.create_structure(schema=TestSchema, messages=[user_message])
     print(response.object)
 
 
@@ -110,8 +105,8 @@ async def main() -> None:
     print("*" * 10, "xai_stream_abort")
     await xai_stream_abort()
     # TODO #445 currently fails with xai - check openai
-    # print("*" * 10, "xai_structure")
-    # await xai_structure()
+    print("*" * 10, "xai_structure")
+    await xai_structure()
     print("*" * 10, "xai_stream_parser")
     await xai_stream_parser()
 
