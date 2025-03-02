@@ -1,5 +1,3 @@
-# TODO: #445 Add example for grok *NOT WORKING YET - this needs updating*
-
 import asyncio
 
 from pydantic import BaseModel, Field
@@ -22,7 +20,6 @@ async def xai_from_name() -> None:
     print(response.get_text_content())
 
 
-# TODO: #445 The naming makes no sense here
 async def xai_granite_from_name() -> None:
     llm = ChatModel.from_name("xai:grok-2")
     user_message = UserMessage("what states are part of New England?")
@@ -104,7 +101,6 @@ async def main() -> None:
     await xai_stream()
     print("*" * 10, "xai_stream_abort")
     await xai_stream_abort()
-    # TODO #445 currently fails with xai - check openai
     print("*" * 10, "xai_structure")
     await xai_structure()
     print("*" * 10, "xai_stream_parser")
