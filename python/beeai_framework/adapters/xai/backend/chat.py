@@ -22,14 +22,12 @@ from beeai_framework.utils.custom_logger import BeeLogger
 logger = BeeLogger(__name__)
 
 
-class xAIChatModel(LiteLLMChatModel):
+class XAIChatModel(LiteLLMChatModel):
     @property
     def provider_id(self) -> ProviderName:
         return "xai"
 
-    def __init__(
-        self, model_id: str | None = None, settings: dict | None = None
-    ) -> None:
+    def __init__(self, model_id: str | None = None, settings: dict | None = None) -> None:
         _settings = settings.copy() if settings is not None else {}
         super().__init__(
             # TODO: #445 update to grok3. Also do we respect

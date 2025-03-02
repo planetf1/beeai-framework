@@ -24,7 +24,7 @@ from beeai_framework.adapters.groq.backend.chat import GroqChatModel
 from beeai_framework.adapters.ollama.backend.chat import OllamaChatModel
 from beeai_framework.adapters.openai.backend.chat import OpenAIChatModel
 from beeai_framework.adapters.watsonx.backend.chat import WatsonxChatModel
-from beeai_framework.adapters.xai.backend.chat import xAIChatModel
+from beeai_framework.adapters.xai.backend.chat import XAIChatModel
 from beeai_framework.backend.chat import (
     ChatModel,
     ChatModelInput,

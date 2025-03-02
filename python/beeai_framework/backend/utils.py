@@ -66,7 +66,7 @@ def load_model(name: ProviderName | str, model_type: Literal["embedding", "chat"
     module_path = f"beeai_framework.adapters.{provider_def.module}.backend.{model_type}"
     module = import_module(module_path)
 
-    # TODO: #445 this will fail with xAIChatModel so go to XaiChatModel
+    # TODO: #445 this will fail with XAIChatModel so go to XAIChatModel
     class_name = f"{provider_def.name}{model_type.capitalize()}Model"
     return getattr(module, class_name)
 

@@ -5,7 +5,7 @@ import asyncio
 from pydantic import BaseModel, Field
 from traitlets import Callable
 
-from beeai_framework.adapters.xai.backend.chat import xAIChatModel
+from beeai_framework.adapters.xai.backend.chat import XAIChatModel
 from beeai_framework.backend.chat import ChatModel, ChatModelOutput
 from beeai_framework.backend.message import UserMessage
 from beeai_framework.cancellation import AbortSignal
@@ -31,21 +31,21 @@ async def xai_granite_from_name() -> None:
 
 
 async def xai_sync() -> None:
-    llm = xAIChatModel("grok-2")
+    llm = XAIChatModel("grok-2")
     user_message = UserMessage("what is the capital of Massachusetts?")
     response = await llm.create(messages=[user_message])
     print(response.get_text_content())
 
 
 async def xai_stream() -> None:
-    llm = xAIChatModel("grok-2")
+    llm = XAIChatModel("grok-2")
     user_message = UserMessage("How many islands make up the country of Cape Verde?")
     response = await llm.create(messages=[user_message], stream=True)
     print(response.get_text_content())
 
 
 async def xai_stream_abort() -> None:
-    llm = xAIChatModel("grok-2")
+    llm = XAIChatModel("grok-2")
     user_message = UserMessage("What is the smallest of the Cape Verde islands?")
 
     try:
@@ -63,7 +63,7 @@ async def xai_structure() -> None:
     class TestSchema(BaseModel):
         answer: str = Field(description="your final answer")
 
-    llm = xAIChatModel("grok-2")
+    llm = XAIChatModel("grok-2")
     user_message = UserMessage("How many islands make up the country of Cape Verde?")
     response = await llm.create_structure(
         {
@@ -75,7 +75,7 @@ async def xai_structure() -> None:
 
 
 async def xai_stream_parser() -> None:
-    llm = xAIChatModel("grok-2")
+    llm = XAIChatModel("grok-2")
 
     parser = LinePrefixParser(
         nodes={
@@ -110,8 +110,8 @@ async def main() -> None:
     print("*" * 10, "xai_stream_abort")
     await xai_stream_abort()
     # TODO #445 currently fails with xai - check openai
-    #print("*" * 10, "xai_structure")
-    #await xai_structure()
+    # print("*" * 10, "xai_structure")
+    # await xai_structure()
     print("*" * 10, "xai_stream_parser")
     await xai_stream_parser()
 
