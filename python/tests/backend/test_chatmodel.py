@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+# TODO: #445 sort imports
 import asyncio
 from collections.abc import AsyncGenerator
 
@@ -23,7 +23,7 @@ from pydantic import BaseModel
 from beeai_framework.adapters.groq.backend.chat import GroqChatModel
 from beeai_framework.adapters.ollama.backend.chat import OllamaChatModel
 from beeai_framework.adapters.openai.backend.chat import OpenAIChatModel
-from beeai_framework.adapters.watsonx.backend.chat import WatsonxChatModel
+from beeai_framework.adapters.watsonx.backend.chat import GrokChatModel, WatsonxChatModel
 from beeai_framework.backend.chat import (
     ChatModel,
     ChatModelInput,
@@ -171,3 +171,6 @@ def test_chat_model_from(monkeypatch: pytest.MonkeyPatch) -> None:
 
     groq_chat_model = ChatModel.from_name("groq:gemma2-9b-it")
     assert isinstance(groq_chat_model, GroqChatModel)
+
+    grok_chat_model = ChatModel.from_name("xai:grok-2")
+    assert isinstance(grok_chat_model, GrokChatModel)

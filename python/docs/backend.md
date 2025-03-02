@@ -41,6 +41,8 @@ BeeAI framework's backend is designed with a provider-based architecture, allowi
 
 The following table depicts supported providers. Each provider requires specific configuration through environment variables. Ensure all required variables are set before initializing a provider.
 
+<!-- TODO: #445 Add Grok backend info>
+
 | Name             | Chat | Embedding | Dependency               | Environment Variables                                                                                                                                                 |
 | ---------------- | :--: | :-------: | ------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Ollama`         |  ✅  |          | `ollama-ai-provider`     | OLLAMA_CHAT_MODEL<br/>OLLAMA_BASE_URL                                                                                                       |
