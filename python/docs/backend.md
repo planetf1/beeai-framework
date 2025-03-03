@@ -51,6 +51,8 @@ The following table depicts supported providers. Each provider requires specific
 | `Google Vertex`  |    |         | Coming soon! | GOOGLE_VERTEX_CHAT_MODEL<br>GOOGLE_VERTEX_EMBEDDING_MODEL<br>GOOGLE_VERTEX_PROJECT<br>GOOGLE_VERTEX_ENDPOINT<br>GOOGLE_VERTEX_LOCATION |
 | `Azure OpenAI`   |    |         | Coming soon! | AZURE_OPENAI_CHAT_MODEL<br>AZURE_OPENAI_EMBEDDING_MODEL<br>AZURE_OPENAI_API_KEY<br>AZURE_OPENAI_API_ENDPOINT<br>AZURE_OPENAI_API_RESOURCE<br>AZURE_OPENAI_API_VERSION |
 | `Anthropic`      |    |         | Coming soon! | ANTHROPIC_CHAT_MODEL<br>ANTHROPIC_EMBEDDING_MODEL<br>ANTHROPIC_API_KEY<br>ANTHROPIC_API_BASE_URL<br>ANTHROPIC_API_HEADERS |
+| `xAI`           |  ✅  |         | | XAI_CHAT_MODEL<br>XAI_API_KEY |
+
 
 > [!TIP]
 >

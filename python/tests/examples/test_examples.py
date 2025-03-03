@@ -23,7 +23,6 @@ load_dotenv()
 
 all_examples = list(pathlib.Path(__file__, "../../../examples").resolve().rglob("*.py"))
 
-<<<<<<< HEAD
 exclude = list(
     filter(
         None,
@@ -34,25 +33,12 @@ exclude = list(
             "backend/providers/watsonx.py" if os.getenv("WATSONX_API_KEY") is None else None,
             "backend/providers/openai_example.py" if os.getenv("OPENAI_API_KEY") is None else None,
             "backend/providers/groq.py" if os.getenv("GROQ_API_KEY") is None else None,
+            "backend/providers/xai.py" if os.getenv("XAI_API_KEY") is None else None,
             # requires Searx instance
             "workflows/web_agent.py",
         ],
     )
 )
-=======
-exclude = [
-    "version.py",
-    "helpers/io.py",
-    # Searx
-    "workflows/web_agent.py",
-    # WatsonX
-    "backend/providers/watsonx.py",
-    # OpenAI
-    "backend/providers/openai_example.py",
-    # xAI
-    "backend/providers/xai.py",
-]
->>>>>>> 36e197a (feat(adapters): Grok - address review comments)
 
 
 def example_name(path: str) -> str:
