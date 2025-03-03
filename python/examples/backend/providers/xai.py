@@ -19,14 +19,6 @@ async def xai_from_name() -> None:
     response = await llm.create(messages=[user_message])
     print(response.get_text_content())
 
-
-async def xai_granite_from_name() -> None:
-    llm = ChatModel.from_name("xai:grok-2")
-    user_message = UserMessage("what states are part of New England?")
-    response = await llm.create(messages=[user_message])
-    print(response.get_text_content())
-
-
 async def xai_sync() -> None:
     llm = XAIChatModel("grok-2")
     user_message = UserMessage("what is the capital of Massachusetts?")
@@ -94,8 +86,6 @@ async def main() -> None:
     print("*" * 10, "xai_from_name")
     await xai_from_name()
     print("*" * 10, "xai_granite_from_name")
-    await xai_granite_from_name()
-    print("*" * 10, "xai_sync")
     await xai_sync()
     print("*" * 10, "xai_stream")
     await xai_stream()

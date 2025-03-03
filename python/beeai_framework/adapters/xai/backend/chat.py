@@ -29,8 +29,9 @@ class XAIChatModel(LiteLLMChatModel):
 
     def __init__(self, model_id: str | None = None, settings: dict | None = None) -> None:
         _settings = settings.copy() if settings is not None else {}
+        api_key = _settings.get("api_key", os.getenv("XAI_API_KEY"))
         super().__init__(
             model_id if model_id else os.getenv("XAI_CHAT_MODEL", "grok-2"),
             provider_id="xai",
-            settings=_settings,
+            settings=_settings | {"api_key": api_key},
         )
