@@ -19,6 +19,7 @@ async def xai_from_name() -> None:
     response = await llm.create(messages=[user_message])
     print(response.get_text_content())
 
+
 async def xai_sync() -> None:
     llm = XAIChatModel("grok-2")
     user_message = UserMessage("what is the capital of Massachusetts?")
