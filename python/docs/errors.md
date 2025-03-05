@@ -17,18 +17,16 @@ Benefits of using `FrameworkError`:
 
 This structure ensures that users can trace the complete error history while clearly identifying any errors originating from the BeeAI Framework.
 
-## Specialized Error Classes
-
-The BeeAI Framework extends `FrameworkError` to create specialized error classes for different components or scenarios. This ensures that each part of the framework has clear and well-defined error types, improving debugging and error handling.
-
-Framework error has two additional properties which help with agent processing, though ultimately the code that catches the exception will determine the appropriate action.
+Framework error also has two additional properties which help with agent processing, though ultimately the code that catches the exception will determine the appropriate action.
 
 - **is_retryable** : hints that the error is retryable.
 - **is_fatal** : hints that the error is fatal.
 
-> [!TIP]
->
-> Wrapping a standard Exception within a `FrameworkError` can be done by calling the `FrameworkError.ensure` static method. This will have no effect if the passed exception is already a `FrameworkError`.
+## Specialized Error Classes
+
+The BeeAI Framework extends `FrameworkError` to create specialized error classes for different components or scenarios. This ensures that each part of the framework has clear and well-defined error types, improving debugging and error handling.
+
+
 
 ### Aborts
 
@@ -77,3 +75,56 @@ Framework error has two additional properties which help with agent processing, 
 - `BackendError` : Raised when a backend encounters an error.
   - `ChatModelError` : Raised when a chat model fails to process input data. Subclass of BackendError.
 - `MessageError` : Raised when a message processing fails.
+
+## Usage
+
+To use Framework error, add the following import
+```python
+from beeai_framework.errors import FrameworkError
+```
+
+Add any additional custom errors you need in your code to the import, for example
+```python
+from beeai_framework.errors import FrameworkError, ChatModelError,ToolError
+```
+
+If you wish to create additional errors, you can extend `FrameworkError` or any of the other errors above:
+
+```python
+from beeai_framework.errors import FrameworkError
+
+class MyCustomError(FrameworkError):
+    def __init__(self, message: str = "My custom error", *, cause: Exception | None = None) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+```
+
+You can wrap existing errors in a `FrameworkError`, for example:
+```python
+inner_err: Exception = ValueError("Value error")
+error = FrameworkError.ensure(inner_err)
+raise(error)
+```
+
+Framework error also has two additional properties which help with agent processing, though ultimately the code that catches the exception will determine the appropriate action.
+
+- **is_retryable** : hints that the error is retryable.
+- **is_fatal** : hints that the error is fatal.
+
+these can be accessed via:
+
+```python
+err = FrameworkError("error")
+isfatal: bool = FrameworkError.is_fatal(err)
+isretryable: bool = FrameworkError.is_retryable(err)
+```
+
+This allows use of some useful functions within the error class.
+
+For example the `explain` static method will return a string that may be more useful for an LLM to interpret:
+
+```python
+message: str = FrameworkError.ensure(error).explain()
+```
+
+See the source file [errors.py](python/beeai_framework
+/errors.py) for additional methods.
