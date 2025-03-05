@@ -26,7 +26,7 @@ Framework error also has two additional properties which help with agent process
 
 The BeeAI Framework extends `FrameworkError` to create specialized error classes for different components or scenarios. This ensures that each part of the framework has clear and well-defined error types, improving debugging and error handling.
 
-
+The definitions for these classes are typically local to the module where they are raised.
 
 ### Aborts
 
