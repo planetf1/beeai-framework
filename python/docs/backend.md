@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
 _Source: [examples/backend/providers/watsonx.py](/python/examples/backend/providers/watsonx.py)_
 
-All providers examples can be found in [examples/backend/providers](/examples/backend/providers).
+All providers examples can be found in [examples/backend/providers](/python/examples/backend/providers).
 
 ---
 
