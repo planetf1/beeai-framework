@@ -32,6 +32,7 @@ Benefits of using `FrameworkError`:
 
 - **Additional properties**: Exceptions may include additional properties to provide a more detailed view of the error.
 - **Preserved error chains**: Retains the full history of errors, giving developers full context for debugging.
+- **Context**: Each error can now contain a dictionary of context, allowing you to store additional values to help the user identify and debug the error.
 - **Utility functions:** Includes methods for formatting error stack traces and explanations, making them suitable for use with LLMs and other external tools.
 - **Native support:** Built on native Python Exceptions functionality, avoiding the need for additional dependencies while leveraging familiar mechanisms.
 
@@ -149,9 +150,10 @@ If you wish to create additional errors, you can extend `FrameworkError` or any 
 ```py
 from beeai_framework.errors import FrameworkError
 
+```py
 class MyCustomError(FrameworkError):
-    def __init__(self, message: str = "My custom error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(self, message: str = "My custom error", *, cause: Exception | None = None, context: dict | None = None) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context or {})
 ```
 
 ### Wrapping existing errors

@@ -12,19 +12,27 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 from asyncio import CancelledError
 from collections.abc import Generator
+from typing import Any
 
 
 def _format_error_message(e: BaseException, *, offset: int = 0, strip_traceback: bool = True) -> str:
     cls = type(e).__name__
     module = type(e).__module__
-
     prefix = "  " * offset
     formatted = f"{cls}({module}): {e!s}"
+    if isinstance(e, FrameworkError) and e.context:
+        try:
+            # Directly use json.dumps, with sort_keys for consistent output.
+            context_json: str = json.dumps(e.context, sort_keys=True)
+            formatted += f"\n{prefix}Context: {context_json}"
+        except TypeError:
+            # Handle serialization errors gracefully.
+            formatted += f'\n{prefix}Context: "Cannot serialize context to JSON"'
     if strip_traceback:
         formatted = formatted.split("\nTraceback")[0]
-
     return "\n".join([f"{prefix}{line}" for line in formatted.split("\n")])
 
 
@@ -41,14 +49,17 @@ class FrameworkError(Exception):
         is_fatal: bool = False,
         is_retryable: bool = True,
         cause: BaseException | None = None,
+        context: dict[str, Any] | None = None,
     ) -> None:
         super().__init__(message)
 
         self.message = message
         self.fatal = is_fatal
         self.retryable = is_retryable
-        self._predecessor = cause
+        # Only set _predecessor if cause is a FrameworkError
+        self._predecessor = cause if isinstance(cause, FrameworkError) else None
         self.__cause__ = cause
+        self.context = context or {}
 
     @property
     def predecessor(self) -> BaseException | None:
@@ -85,7 +96,7 @@ class FrameworkError(Exception):
         return False
 
     def traverse(self) -> Generator["FrameworkError", None, None]:
-        next: FrameworkError | BaseException | None = self
+        next: FrameworkError | BaseException | None = self  # Use | for union
         while isinstance(next, FrameworkError):
             yield next
             next = next.predecessor
@@ -125,5 +136,11 @@ class FrameworkError(Exception):
 class AbortError(FrameworkError, CancelledError):
     """Raised when an operation has been aborted."""
 
-    def __init__(self, message: str = "Operation has been aborted!", *, cause: BaseException | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(
+        self,
+        message: str = "Operation has been aborted!",
+        *,
+        cause: BaseException | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context or {})
