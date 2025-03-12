@@ -78,6 +78,11 @@ class LiteLLMChatModel(ChatModel, ABC):
                 if isinstance(parsed_headers, dict):
                     extra_headers = parsed_headers
             except json.JSONDecodeError:
+                logger.error(
+                    f"Error decoding LITELLM_EXTRA_HEADERS: {extra_headers_json}. "
+                    + "This must be a valid JSON string. No extra headers will be set."
+                )
+                # consider raising an exception.            except json.JSONDecodeError:
                 pass
 
         if extra_headers:

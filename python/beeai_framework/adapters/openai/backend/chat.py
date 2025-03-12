@@ -24,11 +24,26 @@ logger = Logger(__name__)
 
 
 class OpenAIChatModel(LiteLLMChatModel):
+    """
+    A chat model implementation for the OpenAI provider, leveraging LiteLLM.
+    """
+
     @property
     def provider_id(self) -> ProviderName:
+        """The provider ID for OpenAI."""
         return "openai"
 
     def __init__(self, model_id: str | None = None, settings: dict[str, Any] | None = None) -> None:
+        """
+        Initializes the OpenAIChatModel.
+
+        Args:
+            model_id: The ID of the OpenAI model to use. If not provided,
+                it falls back to the OPENAI_CHAT_MODEL environment variable,
+                and then defaults to 'gpt-4o'.
+            settings: A dictionary of settings to configure the model.
+                These settings will take precedence over environment variables.
+        """
         _settings = settings.copy() if settings is not None else {}
 
         super().__init__(
