@@ -53,7 +53,10 @@ The following table depicts supported providers. Each provider requires specific
 | `Anthropic`      |  ✅  |         |  | ANTHROPIC_CHAT_MODEL<br>ANTHROPIC_API_KEY |
 | `xAI`           |  ✅  |         | | XAI_CHAT_MODEL<br>XAI_API_KEY |
 
-
+In addition to the variables listed above, the following apply across all existing providers which use LitelLM.
+| Environment variable | Description | Example |
+| -- | -- | -- |
+| `LITELLM_EXTRA_HEADERS` | JSON string of headers to be sent with the request | {"secret-key": "a764e90bac"}
 > [!TIP]
 >
 > If you don't see your provider raise an issue [here](https://github.com/i-am-bee/beeai-framework/discussions). Meanwhile, you can use [Ollama adapter](/python/examples/backend/providers/ollama.py).
