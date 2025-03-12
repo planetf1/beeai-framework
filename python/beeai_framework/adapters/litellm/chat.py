@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
 import logging
 import os
 from abc import ABC
@@ -70,17 +69,25 @@ class LiteLLMChatModel(ChatModel, ABC):
 
         # Extra headers logic
         extra_headers = None
-        extra_headers_json = self._settings.get("extra_headers", os.getenv("LITELLM_EXTRA_HEADERS"))
+        extra_headers_str = self._settings.get("extra_headers", os.getenv("LITELLM_EXTRA_HEADERS"))
 
-        if extra_headers_json:
+        if extra_headers_str:
             try:
-                parsed_headers = json.loads(extra_headers_json)
-                if isinstance(parsed_headers, dict):
+                parsed_headers = {}
+                for pair in extra_headers_str.split(","):
+                    pair = pair.strip()
+                    if "=" in pair:
+                        key, value = pair.split("=", 1)
+                        parsed_headers[key.strip()] = value.strip()
+
+                if parsed_headers:
                     extra_headers = parsed_headers
-            except json.JSONDecodeError:
+
+            except Exception as e:
                 logger.error(
-                    f"Error decoding LITELLM_EXTRA_HEADERS: {extra_headers_json}. "
-                    + "This must be a valid JSON string. No extra headers will be set."
+                    f"Error parsing LITELLM_EXTRA_HEADERS: {extra_headers_str}. "
+                    f"Error: {e}. "
+                    "This must be a comma-separated list of key=value pairs. No extra headers will be set."
                 )
                 # consider raising an exception.            except json.JSONDecodeError:
                 pass
