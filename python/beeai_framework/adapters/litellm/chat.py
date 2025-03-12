@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import logging
+import os
 from abc import ABC
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -31,6 +33,7 @@ from beeai_framework.adapters.litellm._patch import _patch_litellm_cache
 from beeai_framework.backend.chat import (
     ChatModel,
 )
+from beeai_framework.backend.constants import ProviderName
 from beeai_framework.backend.errors import ChatModelError
 from beeai_framework.backend.message import (
     AssistantMessage,
@@ -63,7 +66,22 @@ class LiteLLMChatModel(ChatModel, ABC):
         self.supported_params = get_supported_openai_params(model=self.model_id, custom_llm_provider=provider_id) or []
         # drop any unsupported parameters that were passed in
         litellm.drop_params = True
-        self._settings = settings or {}
+        self._settings = settings.copy() if settings is not None else {}
+
+        # Extra headers logic
+        extra_headers = None
+        extra_headers_json = self._settings.get("extra_headers", os.getenv("LITELLM_EXTRA_HEADERS"))
+
+        if extra_headers_json:
+            try:
+                parsed_headers = json.loads(extra_headers_json)
+                if isinstance(parsed_headers, dict):
+                    extra_headers = parsed_headers
+            except json.JSONDecodeError:
+                pass
+
+        if extra_headers:
+            self._settings["extra_headers"] = extra_headers
 
     @staticmethod
     def litellm_debug(enable: bool = True) -> None:
