@@ -32,7 +32,6 @@ from beeai_framework.adapters.litellm._patch import _patch_litellm_cache
 from beeai_framework.backend.chat import (
     ChatModel,
 )
-from beeai_framework.backend.constants import ProviderName
 from beeai_framework.backend.errors import ChatModelError
 from beeai_framework.backend.message import (
     AssistantMessage,
