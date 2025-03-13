@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import logging
-import os
 from abc import ABC
 from collections.abc import AsyncGenerator
 from typing import Any
@@ -66,37 +65,11 @@ class LiteLLMChatModel(ChatModel, ABC):
         litellm.drop_params = True
         self._settings = settings.copy() if settings is not None else {}
 
-        # Extra headers logic
-        extra_headers = None
-        extra_headers_str = self._settings.get("extra_headers", os.getenv("LITELLM_EXTRA_HEADERS"))
-
-        if extra_headers_str:
-            try:
-                parsed_headers = {}
-                for pair in extra_headers_str.split(","):
-                    pair = pair.strip()
-                    if "=" in pair:
-                        key, value = pair.split("=", 1)
-                        parsed_headers[key.strip()] = value.strip()
-
-                if parsed_headers:
-                    extra_headers = parsed_headers
-
-            except Exception as e:
-                logger.error(
-                    f"Error parsing LITELLM_EXTRA_HEADERS: {extra_headers_str}. "
-                    f"Error: {e}. "
-                    "This must be a comma-separated list of key=value pairs. No extra headers will be set."
-                )
-                # consider raising an exception.            except json.JSONDecodeError:
-                pass
-
-        if extra_headers:
-            self._settings["extra_headers"] = extra_headers
-
     @staticmethod
     def litellm_debug(enable: bool = True) -> None:
         litellm.set_verbose = enable  # type: ignore
+        litellm.suppress_debug_info = not enable
+
         litellm.suppress_debug_info = not enable
         litellm.logging = enable
 

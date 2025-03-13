@@ -16,6 +16,7 @@
 import os
 from typing import Any
 
+from beeai_framework.adapters.litellm import utils
 from beeai_framework.adapters.litellm.chat import LiteLLMChatModel
 from beeai_framework.backend.constants import ProviderName
 from beeai_framework.logger import Logger
@@ -51,3 +52,8 @@ class OpenAIChatModel(LiteLLMChatModel):
             provider_id="openai",
             settings=_settings,
         )
+        self._settings["extra_headers"] = utils.parse_extra_headers(
+            self._settings.get("extra_headers"), os.getenv("OPENAI_EXTRA_HEADERS")
+        )
+
+        pass
