@@ -71,5 +71,11 @@ class PromptTemplate(Generic[T]):
 class PromptTemplateError(FrameworkError):
     """Raised for errors caused by PromptTemplate."""
 
-    def __init__(self, message: str = "PromptTemplate error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(
+        self,
+        message: str = "PromptTemplate error",
+        *,
+        cause: Exception | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)

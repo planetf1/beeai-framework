@@ -26,8 +26,14 @@ from beeai_framework.utils.events import MessageEvent
 class LoggerError(FrameworkError):
     """Raised for errors caused by logging."""
 
-    def __init__(self, message: str = "Logger error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(
+        self,
+        message: str = "Logger error",
+        *,
+        cause: Exception | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)
 
 
 class LoggerFormatter(Formatter):

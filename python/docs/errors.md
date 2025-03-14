@@ -32,7 +32,7 @@ Benefits of using `FrameworkError`:
 
 - **Additional properties**: Exceptions may include additional properties to provide a more detailed view of the error.
 - **Preserved error chains**: Retains the full history of errors, giving developers full context for debugging.
-- **Context**: Each error can now contain a dictionary of context, allowing you to store additional values to help the user identify and debug the error.
+- **Context**: Each error can contain a dictionary of context, allowing you to store additional values to help the user identify and debug the error.
 - **Utility functions:** Includes methods for formatting error stack traces and explanations, making them suitable for use with LLMs and other external tools.
 - **Native support:** Built on native Python Exceptions functionality, avoiding the need for additional dependencies while leveraging familiar mechanisms.
 
@@ -42,18 +42,33 @@ This structure ensures that users can trace the complete error history while cle
 ```py
 from beeai_framework.errors import FrameworkError
 
-error = FrameworkError("Fuction 'getUser' has failed.", is_fatal=True, is_retryable=False)
+# Create the main FrameworkError instance
+error = FrameworkError("Function 'getUser' has failed.", is_fatal=True, is_retryable=False)
 inner_error = FrameworkError("Cannot retrieve data from the API.")
 innermost_error = ValueError("User with Given ID Does not exist!")
 
+# Chain the errors together using __cause__
 inner_error.__cause__ = innermost_error
 error.__cause__ = inner_error
 
+# Set the context dictionary for the top level error
+# Add any additional context here. This will help with debugging
+error.context["workflow"] = "activity_planner"
+error.context["provider"] = "ollama"
+error.context["chat_model"] = "granite3.2:8b"
+
+# Print some properties of the error
+print("\n-- Error properties:")
 print(f"Message: {error.message}")  # Main error message
 # Is the error fatal/retryable?
 print(f"Meta: fatal:{FrameworkError.is_fatal(error)} retryable:{FrameworkError.is_retryable(error)}")
 print(f"Cause: {error.get_cause()}")  # Prints the cause of the error
+print(f"Context: {error.context}")  # Prints the dictionary of the error context
+
+print("\n-- Explain:")
 print(error.explain())  # Human-readable format without stack traces (ideal for LLMs)
+print("\n-- str():")
+print(str(error))  # Human-readable format (for debug)
 
 ```
 
@@ -153,7 +168,7 @@ from beeai_framework.errors import FrameworkError
 ```py
 class MyCustomError(FrameworkError):
     def __init__(self, message: str = "My custom error", *, cause: Exception | None = None, context: dict | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context or {})
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)
 ```
 
 ### Wrapping existing errors

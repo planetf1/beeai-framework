@@ -12,18 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any
+
 from pydantic import ValidationError
 
 from beeai_framework.errors import FrameworkError
 
 
 class ToolError(FrameworkError):
-    def __init__(self, message: str = "Tool Error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(
+        self,
+        message: str = "Tool Error",
+        *,
+        cause: Exception | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)
 
 
 class ToolInputValidationError(ToolError):
     def __init__(
-        self, message: str = "Tool Input Validation Error", *, cause: ValidationError | ValueError | None = None
+        self,
+        message: str = "Tool Input Validation Error",
+        *,
+        cause: ValidationError | ValueError | None = None,
+        context: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(message, cause=cause)
+        super().__init__(message, cause=cause, context=context)

@@ -143,4 +143,4 @@ class AbortError(FrameworkError, CancelledError):
         cause: BaseException | None = None,
         context: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context or {})
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)

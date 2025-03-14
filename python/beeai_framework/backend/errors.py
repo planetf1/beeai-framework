@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import Any
 
 from beeai_framework.errors import FrameworkError
 
@@ -24,15 +25,28 @@ class BackendError(FrameworkError):
         is_fatal: bool = True,
         is_retryable: bool = False,
         cause: Exception | None = None,
+        context: dict[str, Any] | None = None,
     ) -> None:
-        super().__init__(message, is_fatal=is_fatal, is_retryable=is_retryable, cause=cause)
+        super().__init__(message, is_fatal=is_fatal, is_retryable=is_retryable, cause=cause, context=context)
 
 
 class ChatModelError(BackendError):
-    def __init__(self, message: str = "Chat Model error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(
+        self,
+        message: str = "Chat Model error",
+        *,
+        cause: Exception | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)
 
 
 class MessageError(FrameworkError):
-    def __init__(self, message: str = "Message Error", *, cause: Exception | None = None) -> None:
-        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause)
+    def __init__(
+        self,
+        message: str = "Message Error",
+        *,
+        cause: Exception | None = None,
+        context: dict[str, Any] | None = None,
+    ) -> None:
+        super().__init__(message, is_fatal=True, is_retryable=False, cause=cause, context=context)
